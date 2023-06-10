@@ -1,4 +1,5 @@
 import os
+import threading
 
 
 # TODO: Bessere Wortlisten (n-gram)
@@ -25,21 +26,25 @@ def generate_dictionary(length, dictionary_location, output_location):
     write_dict(output_location, filtered)
 
 
-def generate_all_dictionaries():
-    for i in range(3, 8):
-        print("=" * 20 + "\n")
-        print(f"Generating {i}-letter dictionaries...")
-        print("common")
-        generate_dictionary(i,
-                            os.path.join("./ger/", "german_common.txt"),
-                            os.path.join(f"./ger/{i}_letter", f"common_{i}.txt"))
-        print("shorter")
-        generate_dictionary(i,
-                            os.path.join("./ger/", "german_shorter.txt"),
-                            os.path.join(f"./ger/{i}_letter", f"shorter_{i}.txt"))
-        print("full")
-        generate_dictionary(i,
-                            os.path.join("./ger/", "german.txt"),
-                            os.path.join(f"./ger/{i}_letter", f"full_{i}.txt"))
-        print(f"Done generating {i}-letter dictionaries!")
-        print("=" * 20)
+def generate_all_dictionaries_for_length(length, dict_names: tuple = ("common", "shorter", "full")):
+    print("common")
+    generate_dictionary(length,
+                        os.path.join("./ger/", "german_common.txt"),
+                        os.path.join(f"./ger/{length}_letter", f"common_{length}.txt"))
+    print("shorter")
+    generate_dictionary(length,
+                        os.path.join("./ger/", "german_shorter.txt"),
+                        os.path.join(f"./ger/{length}_letter", f"shorter_{length}.txt"))
+    print("full")
+    generate_dictionary(length,
+                        os.path.join("./ger/", "german.txt"),
+                        os.path.join(f"./ger/{length}_letter", f"full_{length}.txt"))
+
+
+def generate_all_dictionaries(lower, upper):
+    threads = []
+    for i in range(lower, upper + 1):
+        threads.append(threading.Thread(target=generate_all_dictionaries_for_length(),
+                                        args=(i,)))
+    for thread in threads:
+        thread.start()
