@@ -300,7 +300,7 @@ class WordleGame:
                     lett_obj.correct = 1
                 else:
                     not_green_letters = secret_word.count(lett) - len(
-                        [index for index in range(len(cur_word)) if cur_word[index] == secret_word[index]]
+                        [index for index in range(len(cur_word)) if cur_word[index] == secret_word[index] == lett]
                     )
                     if counted_letters.count(lett) < not_green_letters:
                         lett_obj.correct = 1
@@ -332,14 +332,17 @@ class WordleGame:
             self.running = False
         elif key == pygame.K_SPACE:
             self.colors = self.style_vars.toggle_dark_mode()
-        if not self.game_vars.won or self.game_vars.lost:
+        if not (self.game_vars.won or self.game_vars.lost):
             if key in VALID_KEYS:
                 self.handle_valid_key(key)
             elif key == pygame.K_BACKSPACE:
                 self.handle_backspace_key()
-            elif key == pygame.K_RETURN and self.check_word(
-                    self.game_vars.cur_word) and self.game_vars.cur_try <= self.max_tries:
+            elif key == pygame.K_RETURN and self.check_word(self.game_vars.cur_word) and \
+                    self.game_vars.cur_try <= self.max_tries:
                 self.handle_return_key()
+        else:
+            if key == pygame.K_RETURN:
+                self.game_vars.reset_game_vars()
 
     def handle_valid_key(self, key):
         if not self.game_vars.cur_word_index >= self.max_length:
@@ -355,8 +358,10 @@ class WordleGame:
         new_line = self.word_to_letter_list(self.game_vars.cur_word, self.game_vars.keys, self.game_vars.secret_word)
         if [lett.correct == 2 for lett in new_line].count(True) == self.max_length:
             self.game_vars.won = True
+            print("You won")
         elif self.game_vars.cur_try == self.max_tries:
             self.game_vars.lost = True
+            print("You lost")
         self.game_vars.words.append(new_line)
         self.game_vars.cur_try += 1
         self.game_vars.cur_word = [' ' for _ in range(self.max_length)]
